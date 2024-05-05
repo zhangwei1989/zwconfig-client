@@ -10,23 +10,17 @@ import org.springframework.core.env.EnumerablePropertySource;
  */
 public class ZWConfigPropertySource extends EnumerablePropertySource<ZWConfigSource> {
 
-    private String name;
-
-    private ZWConfigSource configSource;
-
     public ZWConfigPropertySource(String name, ZWConfigSource configSource) {
         super(name, configSource);
-        this.name = name;
-        this.configSource = configSource;
     }
 
     @Override
     public String[] getPropertyNames() {
-        return configSource.getPropertyNames();
+        return source.getPropertyNames();
     }
 
     @Override
     public Object getProperty(String name) {
-        return configSource.getProperty(name);
+        return source.getProperty(name);
     }
 }
