@@ -1,4 +1,7 @@
-package io.github.zhangwei1989.zwconfig.client;
+package io.github.zhangwei1989.zwconfig.client.annotation;
+
+import io.github.zhangwei1989.zwconfig.client.service.ZWConfigRegistrar;
+import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
 
@@ -12,5 +15,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
+@Import(ZWConfigRegistrar.class)
 public @interface EnableZWConfig {
 }
