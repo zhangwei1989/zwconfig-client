@@ -23,4 +23,21 @@ public class ConfigMeta {
 
     private String configServer;
 
+    public String genKey() {
+        return this.app + "-" + this.env + "-" + this.ns;
+    }
+
+    public String listPath() {
+        return path("list");
+    }
+
+    public String versionPath() {
+        return path("version");
+    }
+
+    private String path(String context) {
+        return this.configServer + "/" + context + "?app=" + this.app
+                + "&env=" + this.env + "&ns=" + this.ns;
+    }
+
 }

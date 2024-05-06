@@ -1,7 +1,6 @@
 package io.github.zhangwei1989.zwconfig.client.repository;
 
 import io.github.zhangwei1989.zwconfig.client.config.ConfigMeta;
-import io.github.zhangwei1989.zwconfig.client.config.ZWConfigServiceImpl;
 
 import java.util.Map;
 
@@ -18,4 +17,13 @@ public interface ZWRepository {
     }
 
     Map<String, String> getConfig();
+
+    void addListener(ChangeListener listener);
+
+    interface ChangeListener {
+        void onChange(ChangeEvent event);
+    }
+
+    record ChangeEvent(ConfigMeta meta, Map<String, String> config) {
+    }
 }
