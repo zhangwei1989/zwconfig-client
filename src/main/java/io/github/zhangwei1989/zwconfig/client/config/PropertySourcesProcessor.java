@@ -29,22 +29,23 @@ public class PropertySourcesProcessor  implements BeanFactoryPostProcessor, Prio
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        ConfigurableEnvironment env = (ConfigurableEnvironment) environment;
-        if (env.getPropertySources().contains(ZW_PROPERTY_SOURCES)) {
+        ConfigurableEnvironment ENV = (ConfigurableEnvironment) environment;
+        if (ENV.getPropertySources().contains(ZW_PROPERTY_SOURCES)) {
             return;
         }
 
-        // 通过 http 请求，去 zwconfig server 获取配置 TODO
-        Map<String, String> config = new HashMap<>();
-        config.put("zw.a", "deva500");
-        config.put("zw.b", "devb600");
-        config.put("zw.c", "devc700");
+        String app = ENV.getProperty("zwconfig.app", "app1");
+        String env = ENV.getProperty("zwconfig.env", "dev");
+        String ns = ENV.getProperty("zwconfig.ns", "public");
+        String configServer = ENV.getProperty("zwconfig.configServer", "http://localhost:9129");
 
-        ZWConfigService configService = new ZWConfigServiceImpl(config);
+        ConfigMeta config = new ConfigMeta(app, env, ns, configServer);
+
+        ZWConfigService configService = ZWConfigService.getDefault(config);
         ZWPropertySource propertySource = new ZWPropertySource(ZW_PROPERTY_SOURCE, configService);
         CompositePropertySource composite = new CompositePropertySource(ZW_PROPERTY_SOURCES);
         composite.addPropertySource(propertySource);
-        env.getPropertySources().addFirst(composite);
+        ENV.getPropertySources().addFirst(composite);
     }
 
     @Override
