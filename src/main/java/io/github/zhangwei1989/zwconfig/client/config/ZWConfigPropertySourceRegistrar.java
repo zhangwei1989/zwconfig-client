@@ -1,5 +1,6 @@
-package io.github.zhangwei1989.zwconfig.client.service;
+package io.github.zhangwei1989.zwconfig.client.config;
 
+import io.github.zhangwei1989.zwconfig.client.repository.ConfigMeta;
 import lombok.Data;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -11,8 +12,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -33,29 +32,28 @@ public class ZWConfigPropertySourceRegistrar implements BeanFactoryPostProcessor
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         // 如果已经有ZWConfigPropertySourceRegistrar这个 bean 了，那么就不需要额外操作了
-        ConfigurableEnvironment env = (ConfigurableEnvironment) environment;
+        ConfigurableEnvironment projectEnv = (ConfigurableEnvironment) environment;
 
-        Optional<PropertySource<?>> first = env.getPropertySources().stream()
+        Optional<PropertySource<?>> first = projectEnv.getPropertySources().stream()
                 .filter(x -> ZWCONFIG_PROPERTY_SOURCES.equals(x.getName())).findFirst();
 
         if (first.isPresent()) {
             return;
         }
 
-        // 从 zwconfig-server 获取配置信息
-        // TODO 先 MOCK
-        Map<String, String> config = new HashMap<>();
-        config.put("zw.a", "deva100");
-        config.put("zw.b", "devb100");
-        config.put("zw.c", "devc100");
+        String app = environment.getProperty("zwconfig.app", "app1");
+        String env = environment.getProperty("zwconfig.env", "dev");
+        String ns = environment.getProperty("zwconfig.ns", "public");
+        String server = environment.getProperty("zwconfig.server", "http://localhost:9129");
+        ConfigMeta configMeta = new ConfigMeta(app, env, ns, server);
 
-        ZWConfigSource configSource = new ZWConfigSourceImpl(config);
+        ZWConfigSource configSource = ZWConfigSource.getDefault(configMeta);
         ZWConfigPropertySource propertySource = new ZWConfigPropertySource(ZWCONFIG_PROPERTY_SOURCE, configSource);
         CompositePropertySource compositePropertySource = new CompositePropertySource(ZWCONFIG_PROPERTY_SOURCES);
         compositePropertySource.addPropertySource(propertySource);
 
         // 放到所有PropertySource的第一位
-        env.getPropertySources().addFirst(compositePropertySource);
+        projectEnv.getPropertySources().addFirst(compositePropertySource);
     }
 
     @Override

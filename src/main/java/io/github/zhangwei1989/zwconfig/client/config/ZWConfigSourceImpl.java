@@ -1,4 +1,4 @@
-package io.github.zhangwei1989.zwconfig.client.service;
+package io.github.zhangwei1989.zwconfig.client.config;
 
 import java.util.Map;
 

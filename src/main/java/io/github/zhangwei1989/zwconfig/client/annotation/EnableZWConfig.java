@@ -1,6 +1,6 @@
 package io.github.zhangwei1989.zwconfig.client.annotation;
 
-import io.github.zhangwei1989.zwconfig.client.service.ZWConfigRegistrar;
+import io.github.zhangwei1989.zwconfig.client.config.ZWConfigRegistrar;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;

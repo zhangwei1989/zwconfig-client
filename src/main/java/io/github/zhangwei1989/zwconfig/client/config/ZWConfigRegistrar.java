@@ -1,4 +1,4 @@
-package io.github.zhangwei1989.zwconfig.client.service;
+package io.github.zhangwei1989.zwconfig.client.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
