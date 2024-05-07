@@ -2,8 +2,11 @@ package io.github.zhangwei1989.zwconfig.client.repository;
 
 import cn.kimmking.utils.HttpUtils;
 import com.alibaba.fastjson.TypeReference;
+import io.github.zhangwei1989.zwconfig.client.listener.ConfigChangeEvent;
+import io.github.zhangwei1989.zwconfig.client.listener.ConfigChangerListener;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,8 @@ public class ZWConfigRepositoryImpl implements ZWConfigRepository {
     private Map<String, Long> VERSIONS = new HashMap<>();
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+    private List<ConfigChangerListener> listeners = new ArrayList<>();
 
     public ZWConfigRepositoryImpl(ConfigMeta configMeta) {
         this.configMeta = configMeta;
@@ -57,7 +62,18 @@ public class ZWConfigRepositoryImpl implements ZWConfigRepository {
             log.info("======> [ZWConfig] need to update configs, oldVersion is {}, currentVersion is {}", oldVersion, currentVersion);
             cacheConfig.put(key, fetchAll());
             VERSIONS.put(key, currentVersion);
+            // 监听器发布配置更新的事件
+            try {
+                listeners.forEach(l -> l.onChange(new ConfigChangeEvent(configMeta, mapToConfig(cacheConfig.get(key)))));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    @Override
+    public void addConfigListener(ConfigChangerListener listener) {
+        listeners.add(listener);
     }
 
     private Map<String, String> mapToConfig(List<Configs> configs) {

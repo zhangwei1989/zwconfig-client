@@ -1,5 +1,7 @@
 package io.github.zhangwei1989.zwconfig.client.repository;
 
+import io.github.zhangwei1989.zwconfig.client.listener.ConfigChangerListener;
+
 import java.util.Map;
 
 /**
@@ -17,5 +19,7 @@ public interface ZWConfigRepository {
     Map<String, String> getConfig();
 
     void heartBeat();
+
+    void addConfigListener(ConfigChangerListener listener);
 
 }

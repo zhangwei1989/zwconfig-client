@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.CompositePropertySource;
@@ -21,9 +23,12 @@ import java.util.Optional;
  * @Create : 2024/5/5
  */
 @Data
-public class ZWConfigPropertySourceRegistrar implements BeanFactoryPostProcessor, EnvironmentAware, PriorityOrdered {
+public class ZWConfigPropertySourceRegistrar implements BeanFactoryPostProcessor,
+        EnvironmentAware, PriorityOrdered, ApplicationContextAware {
 
     private Environment environment;
+
+    private ApplicationContext applicationContext;
 
     private final static String ZWCONFIG_PROPERTY_SOURCES = "ZWConfigPropertySources";
 
@@ -47,7 +52,7 @@ public class ZWConfigPropertySourceRegistrar implements BeanFactoryPostProcessor
         String server = environment.getProperty("zwconfig.server", "http://localhost:9129");
         ConfigMeta configMeta = new ConfigMeta(app, env, ns, server);
 
-        ZWConfigSource configSource = ZWConfigSource.getDefault(configMeta);
+        ZWConfigSource configSource = ZWConfigSource.getDefault(applicationContext, configMeta);
         ZWConfigPropertySource propertySource = new ZWConfigPropertySource(ZWCONFIG_PROPERTY_SOURCE, configSource);
         CompositePropertySource compositePropertySource = new CompositePropertySource(ZWCONFIG_PROPERTY_SOURCES);
         compositePropertySource.addPropertySource(propertySource);
