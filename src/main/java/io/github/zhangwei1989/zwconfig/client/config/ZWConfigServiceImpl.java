@@ -6,6 +6,8 @@ import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * ZW config service impl
@@ -37,8 +39,29 @@ public class ZWConfigServiceImpl implements ZWConfigService {
 
     @Override
     public void onChange(ZWRepository.ChangeEvent event) {
+        Set<String> keys = calcChangeKeys(this.config, event.config());
+        if (keys.isEmpty()) {
+            return;
+        }
+
         this.config = event.config();
-        log.info("======> [ZWConfig] fire an EnvironmentChangeEvent with keys: {}", this.config.keySet());
-        applicationContext.publishEvent(new EnvironmentChangeEvent(this.config.keySet()));
+
+        log.info("======> [ZWConfig] fire an EnvironmentChangeEvent with keys: {}", keys);
+        applicationContext.publishEvent(new EnvironmentChangeEvent(keys));
+    }
+
+    private Set<String> calcChangeKeys(Map<String, String> oldConfigs, Map<String, String> newConfigs) {
+        if (oldConfigs.isEmpty()) {
+            return newConfigs.keySet();
+        }
+
+        if (newConfigs.isEmpty()) {
+            return oldConfigs.keySet();
+        }
+
+        Set<String> news = newConfigs.keySet().stream().filter(key -> !newConfigs.get(key).equals(oldConfigs.get(key))).collect(Collectors.toSet());
+        oldConfigs.keySet().stream().filter(key -> !newConfigs.containsKey(key)).forEach(news::add);
+
+        return news;
     }
 }
