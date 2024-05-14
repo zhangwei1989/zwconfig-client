@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * ZWConfigSourceImpl
@@ -37,8 +40,23 @@ public class ZWConfigSourceImpl implements ZWConfigSource {
 
     @Override
     public void onChange(ConfigChangeEvent event) {
+        Set<String> changedKeys = calChangedKeys(config, event.getConfig());
+        if (changedKeys.isEmpty()) {
+            return;
+        }
+
         this.config = event.getConfig();
-        log.info("======> [ZWConfig] fire an ConfigChangeEvent with keys: {}", config.keySet());
-        applicationContext.publishEvent(new EnvironmentChangeEvent(config.keySet()));
+        log.info("======> [ZWConfig] fire an ConfigChangeEvent with keys: {}", changedKeys);
+        applicationContext.publishEvent(new EnvironmentChangeEvent(changedKeys));
+    }
+
+    private Set<String> calChangedKeys(Map<String, String> oldConfigs, Map<String, String> newConfigs) {
+        Set<String> changedKeys = oldConfigs.keySet().stream()
+                .filter(k -> !oldConfigs.get(k).equals(newConfigs.get(k))).collect(Collectors.toSet());
+
+        // 处理新增的配置
+        changedKeys.addAll(newConfigs.keySet().stream().filter(k -> !oldConfigs.containsKey(k)).collect(Collectors.toSet()));
+
+        return changedKeys;
     }
 }
